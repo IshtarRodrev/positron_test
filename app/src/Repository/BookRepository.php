@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Author;
 use App\Entity\Book;
+use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -45,4 +47,53 @@ class BookRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * @param Book $entity
+     * @param bool $flush
+     * @return void
+     */
+    public function add(Book $entity, bool $flush = true): void
+    {
+        $this->_em->persist($entity);
+        if ($flush) {
+            $this->_em->flush();
+        }
+    }
+
+    /**
+     * @param Book $book
+     * @param Author $author
+     * @param bool $flush
+     * @return void
+     */
+    public function addAuthor(Book $book, Author $author, bool $flush = true): void
+    {
+        $book->addAuthor($author);
+        $author->addBook($book);
+
+        $this->_em->persist($book);
+        $this->_em->persist($author);
+        if ($flush) {
+            $this->_em->flush();
+        }
+    }
+
+    /**
+     * @param Book $book
+     * @param Category $category
+     * @param bool $flush
+     * @return void
+     */
+    public function addCategory(Book $book, Category $category, bool $flush = true): void
+    {
+        $book->addCategory($category);
+        $category->addBook($book);
+
+        $this->_em->persist($book);
+        $this->_em->persist($category);
+        if ($flush) {
+            $this->_em->flush();
+        }
+    }
 }

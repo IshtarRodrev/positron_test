@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
 class Book
@@ -26,15 +27,16 @@ class Book
     private ?int $pages = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Assert\Date]
     private ?\DateTimeInterface $published = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $cover_image = null;
 
-    #[ORM\Column(length: 255, nullable: false)]
+    #[ORM\Column(type: Types::TEXT, length: 16383, nullable: false)]
     private string $long_description = '';
 
-    #[ORM\Column(length: 255, nullable: false)]
+    #[ORM\Column(length: 2048, nullable: false)]
     private string $short_description = '';
 
     #[ORM\Column(type: Types::SMALLINT)]

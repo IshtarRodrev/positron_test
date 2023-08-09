@@ -14,6 +14,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use App\Enum\BookStatus;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -28,7 +30,6 @@ class BookCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-//            IdField::new('id'),
             ChoiceField::new('status')->setChoices(BookStatus::cases()),
             TextField::new('isbn'),
             TextField::new('title'),
@@ -38,22 +39,16 @@ class BookCrudController extends AbstractCrudController
 
             AssociationField::new('categories')
                 ->setFormTypeOptionIfNotSet('by_reference', false),
-//            CollectionField::new('categories')->setEntryType(EntityType::class),
-//            CollectionField::new('categories')
-//                ->setFormTypeOptions([
-//                    'delete_empty' => true,
-//                    'by_reference' => false,
-//                ])
-//                ->setEntryIsComplex(false)
-//                ->setCustomOptions([
-//                    'allowAdd' => true,
-//                    'allowDelete' => true,
-//                    'entryType' => 'App\Form\CategoryType',
-//                    'showEntryLabel' => false,
-//                ]),
+
+            ImageField::new('cover_image')
+                ->setBasePath('uploads/images/')
+                ->setUploadDir('public/uploads/images/')
+                ->setUploadedFileNamePattern(
+                    fn (UploadedFile $file): string => sprintf('%s.%s', md5(random_int(1, 999) . $file->getFilename() . $file->guessExtension()), $file->guessExtension())
+                ),
 
             IntegerField::new('pages'),
-            TextField::new('cover_image'), // TODO: https://symfony.com/bundles/EasyAdminBundle/current/fields/ImageField.html#setuploaddir
+//            TextField::new('cover_image'), // TODO: https://symfony.com/bundles/EasyAdminBundle/current/fields/ImageField.html#setuploaddir
             TextareaField::new('short_description')->setRequired(false),
             TextEditorField::new('long_description')->setRequired(false),
         ];

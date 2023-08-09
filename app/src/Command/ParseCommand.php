@@ -48,6 +48,18 @@ class ParseCommand extends Command
         ;
     }
 
+    private function curlGetContents($url)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        return $data;
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $em = $this->entityManager;
@@ -77,6 +89,12 @@ class ParseCommand extends Command
 
         $i = 0;
         foreach ($booksJson as $bookJson) {
+
+            if (empty($bookJson['isbn'])) {
+                $io->warning('Warning! Skip book "' . ($bookJson['title'] ?? 'UNKNOWN') . '". No ISBN.');
+                continue;
+            }
+
             $book = $repoBook->findOneBy(['isbn' => $bookJson['isbn']]);
             if ($book) {
                 $output->writeln('Книга  (' . $bookJson['isbn'] . ')  уже есть в базе: "' . $bookJson['title'] . '"');
@@ -86,14 +104,36 @@ class ParseCommand extends Command
             $book = new Book();
             $book->setTitle($bookJson['title']);
             $book->setIsbn($bookJson['isbn']);
-            $book->setPages($bookJson['pageCount']);
+            $book->setPages($bookJson['pageCount'] ?? 0);
 
             $stringDate = $bookJson['publishedDate']['$date'] ?? '';
             $publishedDate = new \DateTimeImmutable;
             $publishedDate::createFromFormat(DATE_ATOM, $stringDate); //: DateTimeImmutable|false
 
             $book->setPublished($publishedDate);
-            $book->setCoverImage($bookJson['thumbnailUrl']);
+
+            if (!empty($bookJson['thumbnailUrl'])) {
+                $output->writeln('image url: ' . $bookJson['thumbnailUrl']);
+
+                $pathUploader = realpath(__DIR__ . '/../../public/uploads/images/') . '/';
+
+                $pathParts = pathinfo($bookJson['thumbnailUrl']);
+                $imageName = sprintf('%s.%s', md5(random_int(1, 999) . $pathParts['filename'] . $pathParts['extension']), $pathParts['extension']);
+
+                $pathToImage = $pathUploader . $imageName;
+
+                $sourceFile = $this->curlGetContents($bookJson['thumbnailUrl']);
+//                $sourceFile = fopen($bookJson['thumbnailUrl'], 'r');
+                if (!$sourceFile || !file_put_contents($pathToImage, $sourceFile)) {
+                    $io->warning('Warning! Skip book "' . ($bookJson['title'] ?? 'UNKNOWN') . '". Failed downloaw image.');
+                    continue;
+                }
+
+                $book->setCoverImage($imageName);
+            } else {
+                $book->setCoverImage('');
+            }
+
             $book->setShortDescription($bookJson['shortDescription'] ?? '');
             $book->setLongDescription($bookJson['longDescription'] ?? '');
 
@@ -104,6 +144,10 @@ class ParseCommand extends Command
 
             if (!empty($bookJson['authors']) && is_array($bookJson['authors'])) {
                 foreach ($bookJson['authors'] as $authorName) {
+                    $categoryName = trim($authorName);
+                    if (empty($authorName))
+                        continue;
+
                     $author = $repoAuthor->findOneBy(['name' => $authorName]);
                     if (!$author) {
                         $author = new Author();
@@ -115,8 +159,13 @@ class ParseCommand extends Command
                 }
             }
 
+            $addedCategory = false;
             if (!empty($bookJson['categories']) && is_array($bookJson['categories'])) {
                 foreach ($bookJson['categories'] as $categoryName) {
+                    $categoryName = trim($categoryName);
+                    if (empty($categoryName))
+                        continue;
+
                     $category = $repoCategory->findOneBy(['category_name' => $categoryName]);
                     if (!$category) {
                         $category = new Category();
@@ -125,10 +174,15 @@ class ParseCommand extends Command
                     }
 
                     $repoBook->addCategory($book, $category);
+                    $addedCategory = true;
                 }
-            } else {
+            }
+
+            if (!$addedCategory) {
                 $repoBook->addCategory($book, $noCategory);
             }
+
+            $output->writeln('Добавлена новая книга  "' . $bookJson['title'] . '"(' . $bookJson['isbn'] . ')');
         }
 
         $io->success(count($booksJson) . ' books have been uploaded successfully! ' . $i . ' books was added.');

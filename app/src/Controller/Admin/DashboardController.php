@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Book;
 use App\Entity\Settings;
+use App\Entity\Feedback;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -54,6 +55,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Categories', 'fa fa-folder', Category::class);
         yield MenuItem::linkToCrud('Books', 'fa fa-book', Book::class);
         yield MenuItem::linkToCrud('Site settings', 'fa fa-gear', Settings::class);
+        yield MenuItem::linkToCrud('Feedback', 'fa-solid fa-comment', Feedback::class);
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
     }
 }

@@ -1,4 +1,4 @@
-{# templates/login/index.html.twig #}
+{# templates/login.html.twig #}
 {% extends 'base.html.twig' %}
 
 {# ... #}
@@ -6,17 +6,6 @@
 {% block body %}
 
     <style type="text/css">
-        .panel-helper {
-            display: inline-block;
-            border: 1px dashed #8da1aa;
-            border-radius: 10px;
-            margin-top: 15px;
-            padding: 8px 12px;
-            background-color: #e6f4fa;
-        }
-        .panel-helper label {
-            color: #5c6568;
-        }
     </style>
     {% if error %}
         <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>

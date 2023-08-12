@@ -1,0 +1,26 @@
+{# templates/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{# ... #}
+
+{% block body %}
+    <style type="text/css">
+    </style>
+
+    {{ form_start(feedbackForm) }}
+        {{ form_row(feedbackForm.name,{
+            label: 'Name'
+        }) }}
+        {{ form_row(feedbackForm.email, {
+            label: 'E-mail'
+        }) }}
+        {{ form_row(feedbackForm.topic, {
+            label: 'Purpose'
+        }) }}
+        {{ form_row(feedbackForm.text, {
+            label: 'Message'
+        }) }}
+
+        <button type="submit" class="btn btn-primary">send</button>
+    {{ form_end(feedbackForm) }}
+{% endblock %}

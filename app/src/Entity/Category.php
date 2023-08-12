@@ -48,6 +48,18 @@ class Category
         return $this->parent;
     }
 
+    public function getAllParents(): array
+    {
+        $result = [];
+        $curCategory = $this;
+        while ($parent = $curCategory->getParent()) {
+            $result[] = $parent;
+            $curCategory = $parent;
+        }
+
+        return array_reverse($result);
+    }
+
     public function setParent(?self $parent): self
     {
         $this->parent = $parent;

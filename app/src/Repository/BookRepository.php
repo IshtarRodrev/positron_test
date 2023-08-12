@@ -5,7 +5,9 @@ namespace App\Repository;
 use App\Entity\Author;
 use App\Entity\Book;
 use App\Entity\Category;
+use App\Entity\Settings;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -95,5 +97,23 @@ class BookRepository extends ServiceEntityRepository
         if ($flush) {
             $this->_em->flush();
         }
+    }
+
+    public function getBooks(Category $category, array $childrenCategory, Settings $settings, $currentPage = 1): Paginator
+    {
+        $offset = $settings->getCountBookElement() * ($currentPage - 1);
+        $limit = $settings->getCountBookElement();
+
+        $paginator = $this->createQueryBuilder('b')
+            ->orderBy('b.title', 'DESC')
+            ->innerJoin('b.categories','cb')
+            ->Where('cb.id IN (:categories)')
+            ->setParameter('categories', $childrenCategory)
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+        ;
+
+        return new Paginator($paginator);
     }
 }

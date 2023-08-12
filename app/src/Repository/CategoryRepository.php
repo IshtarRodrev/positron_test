@@ -4,8 +4,10 @@ namespace App\Repository;
 
 use App\Entity\Author;
 use App\Entity\Category;
+use App\Entity\Settings;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * @extends ServiceEntityRepository<Category>
@@ -59,4 +61,57 @@ class CategoryRepository extends ServiceEntityRepository
             $this->_em->flush();
         }
     }
+
+    public function getRootCategories(): mixed
+    {
+        $query = $this->createQueryBuilder('c')
+            ->where('c.parent IS NULL')
+            ->orderBy('c.id', 'DESC')
+        ;
+
+        return $query->getQuery()->getResult();
+    }
+
+    public function getChildrenCategories(Category $category): array
+    {
+        $query = $this->createQueryBuilder('c')
+            ->select('c.id as id, IDENTITY(c.parent) as parent_id')
+            ->where('c.parent IS NOT NULL')
+            ->orderBy('c.id', 'DESC')
+        ;
+
+        $listCategory = $query->getQuery()->getResult();
+
+        $result = [
+            $category->getId(),
+        ];
+
+        // будем проходиться по массиву несколько раз
+        // на каждой итерации будем добавлять ДОЧЕРНИЕ категории, если их родителей мы уже добавили в $result
+        // и проходимся заново
+        // если в фориче мы ни разу не найдём дочерние категории, то перестаём выполнять ду вайл
+        $find = false;
+        do {
+            $find = false;
+            foreach ($listCategory as $i => $cat) {
+                if (in_array($cat['parent_id'], $result)) {
+                    $result[] = $cat['id'];
+                    unset($listCategory[$i]);
+
+                    $find = true;
+                }
+            }
+        } while ($find);
+
+//        echo "<pre>";
+//        print_r($listCategory);
+//        echo "</pre>";
+//        echo "<pre>";
+//        print_r($result);
+//        echo "</pre>";
+//        die();
+
+        return $result;
+    }
+
 }

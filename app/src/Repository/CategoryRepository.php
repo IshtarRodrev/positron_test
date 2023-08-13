@@ -105,7 +105,6 @@ class CategoryRepository extends ServiceEntityRepository
 
         } while ($find);
 
-
         return $result;
     }
 

@@ -8,6 +8,6 @@
 ### **Загрузка книг**
 Необходимо авторизироваться в админке(`/admin`). лог:пас `admin`:`admin`
 
-В разделе "Site settings" указать URL с которого парсить. Например `https://gitlab.grokhotov.ru/hr/yii-test-vacancy/-/raw/master/books.json#L3260`
+В разделе "Site settings" указать URL с которого парсить. Например `https://gitlab.grokhotov.ru/hr/yii-test-vacancy/-/raw/master/books.json`
 Запустить команду:
 - `docker-compose exec php bin/console app:parse`

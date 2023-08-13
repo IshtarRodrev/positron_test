@@ -4,23 +4,54 @@
 {# ... #}
 
 {% block body %}
-    <style type="text/css">
-    </style>
+    <div class="row">
+        <div class="col-md-2 text-center">
+            {% if book.coverImage %}
+                <img class="cover-image" src="{{ asset('/uploads/images/' ~ book.coverImage) }}" />
+            {% endif %}
+        </div>
+        <div class="col-md-10">
+            <h2>
+                {{ book.title }}
+                {% if book.published %}
+                    ({{ book.published|date('Y') }})
+                {% endif %}
+                <br>
+                {% for author in book.authors %}
+                    <small class="author-item">{{ author }}</small>
+                {% endfor %}
+            </h2>
 
-    {{ form_start(feedbackForm) }}
-        {{ form_row(feedbackForm.name,{
-            label: 'Name'
-        }) }}
-        {{ form_row(feedbackForm.email, {
-            label: 'E-mail'
-        }) }}
-        {{ form_row(feedbackForm.topic, {
-            label: 'Purpose'
-        }) }}
-        {{ form_row(feedbackForm.text, {
-            label: 'Message'
-        }) }}
+            {% if book.longDescription %}
+                <i>{{ book.longDescription }}</i>
+            {% endif %}
+            <div>
+                <br><b>Артикул</b>: {{ book.isbn }}
+                <br><b>Кол-во страниц</b>: {{ book.pages }}
+                <br><b>Опубликовано</b>:
+                {% if book.published %}
+                    {{ book.published|date('d.m.Y') }}
+                {% endif %}
+                <br>
+            </div>
 
-        <button type="submit" class="btn btn-primary">send</button>
-    {{ form_end(feedbackForm) }}
+            <ul class="list-inline list-category">
+                {% for category in book.categories %}
+                    <li>
+                        <a class="btn btn-default btn-sm"  href="{{ path('app_category_view', { id: category.id }) }}">{{ category }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+            <b>Related books:</b>
+            <ul class="list-inline">
+                {% for item in related %}
+                    <li>
+                        <a href="{{ path('app_book', { id: item.id }) }}">{{ item.title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {#        Книги из текущей категории(если имеются такие) (опционально)#}
+
 {% endblock %}

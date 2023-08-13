@@ -90,26 +90,21 @@ class CategoryRepository extends ServiceEntityRepository
         // на каждой итерации будем добавлять ДОЧЕРНИЕ категории, если их родителей мы уже добавили в $result
         // и проходимся заново
         // если в фориче мы ни разу не найдём дочерние категории, то перестаём выполнять ду вайл
-        $find = false;
         do {
             $find = false;
+
             foreach ($listCategory as $i => $cat) {
                 if (in_array($cat['parent_id'], $result)) {
                     $result[] = $cat['id'];
                     unset($listCategory[$i]);
-
+                    // необходимо будет пройтись ещё раз по $listCategory
+                    // потому что добавленная категория, может быть родительской для других категорий
                     $find = true;
                 }
             }
+
         } while ($find);
 
-//        echo "<pre>";
-//        print_r($listCategory);
-//        echo "</pre>";
-//        echo "<pre>";
-//        print_r($result);
-//        echo "</pre>";
-//        die();
 
         return $result;
     }

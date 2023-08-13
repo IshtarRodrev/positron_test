@@ -24,16 +24,13 @@
     <body>
     <div class="container">
         <header class="page-header">
-            <h1><a href="{{ path('app_home') }}">Positron test</a></h1>
-            <ul>
+            <h1>
+                <a href="{{ path('app_home') }}">Positron test</a>
                 {% if is_granted('ROLE_ADMIN') %}
-                <div id="menu-list">
-                    <label>
-                        <a href="{{ path('admin') }}">Admin zone</a>
-                    </label>
-                </div>
+                <a class="btn btn-danger btn-xs" href="{{ path('admin') }}">Admin zone</a>
                 {% endif %}
-            </ul>
+                <a class="btn btn-default btn-xs" href="{{ path('app_feedback') }}">Feedback</a>
+            </h1>
         </header>
         {% block body %}{% endblock %}
     </div>

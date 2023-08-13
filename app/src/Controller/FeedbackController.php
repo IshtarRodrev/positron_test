@@ -15,12 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class FeedbackController extends AbstractController
 {
-    /**
-     * @Route("/feedback", name="app_feedback")]
-     * @param Request $request
-     * @param FeedbackRepository $feedbackRepository
-     * @return Response
-     */
+    #[Route('/feedback', name: 'app_feedback')]
     public function add(Request $request, FeedbackRepository $feedbackRepository): Response
     {
         $feedback = new Feedback();
